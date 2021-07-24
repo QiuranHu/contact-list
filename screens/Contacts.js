@@ -5,36 +5,73 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import ContactListItem from "../components/ContactListItem";
 import { fetchContacts } from "../utils/api";
+import colors from "../utils/colors";
+import { MaterialIcons } from "@expo/vector-icons";
+import store from "../store";
+import getURLParams from "../utils/getURLParams";
 
 const keyExtractor = ({ phone }) => phone;
 
 export default class Contacts extends React.Component {
-  static navigationOptions = {
+  static navigationOptions = ({ navigation: { navigate } }) => ({
     title: "Contacts",
-  };
+    headerLeft: (
+      <MaterialIcons
+        name="menu"
+        size={24}
+        style={{ color: colors.black, marginLeft: 10 }}
+        onPress={() => navigate("DrawerToggle")}
+      />
+    ),
+  });
 
   state = {
-    contacts: [],
-    loading: true,
-    error: false,
+    contacts: store.getState().contacts,
+    loading: store.getState().isFetchingContacts,
+    error: store.getState().error,
   };
 
   async componentDidMount() {
-    try {
-      const contacts = await fetchContacts();
+    this.unsubscribe = store.onChange(() =>
       this.setState({
-        contacts,
-        loading: false,
-        error: false,
-      });
-    } catch (e) {
-      this.setState({
-        loading: false,
-        error: true,
-      });
+        contacts: store.getState().contacts,
+        loading: store.getState().isFetchingContacts,
+        error: store.getState.error,
+      })
+    );
+    const contacts = await fetchContacts();
+    store.setState({ contacts, isFetchingContacts: false });
+    Linking.addEventListener("url", this.handleOpenUrl);
+    const url = await Linking.getInitialURL();
+    this.handleOpenUrl({ url });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+    this.unsubscribe();
+  }
+
+  handleOpenUrl = (event) => {
+    const {
+      navigation: { navigate },
+    } = this.props;
+    const { url } = event;
+    const params = getURLParams(url);
+    if (params.name) {
+      const queriedContact = store
+        .getState()
+        .contacts.find(
+          (contact) =>
+            contact.name.split(" ")[0].toLowerCase() ===
+            params.name.toLowerCase()
+        );
+      if (queriedContact) {
+        navigate("Profile", { id: queriedContact.id });
+      }
     }
   }
 

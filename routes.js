@@ -1,5 +1,5 @@
 import React from "react";
-import { StackNavigator, TabNavigator } from "react-navigation";
+import { StackNavigator, DrawerNavigator } from "react-navigation";
 import { MaterialIcons } from "@expo/vector-icons";
 import Contacts from "./screens/Contacts";
 import Profile from "./screens/Profile";
@@ -8,7 +8,7 @@ import Favorites from "./screens/Favorites";
 import User from "./screens/User";
 import Options from "./screens/Options";
 
-const getTabBarIcon =
+const getDrawerItemIcon =
   (icon) =>
   ({ tintColor }) =>
     <MaterialIcons name={icon} size={26} style={{ color: tintColor }} />;
@@ -25,7 +25,7 @@ const ContactsScreens = StackNavigator(
   {
     initialRouteName: "Contacts",
     navigationOptions: {
-      tabBarIcon: getTabBarIcon("list"),
+      drawerIcon: getDrawerItemIcon("list"),
     },
   }
 );
@@ -42,7 +42,7 @@ const FavoritesScreens = StackNavigator(
   {
     initialRouteName: "Favorites",
     navigationOptions: {
-      tabBarIcon: getTabBarIcon("star"),
+      drawerIcon: getDrawerItemIcon("star"),
     },
   }
 );
@@ -60,12 +60,12 @@ const UserScreens = StackNavigator(
     mode: "modal",
     initialRouteName: "User",
     navigationOptions: {
-      tabBarIcon: getTabBarIcon("person"),
+      drawerIcon: getDrawerItemIcon("person"),
     },
   }
 );
 
-export default TabNavigator(
+export default DrawerNavigator(
   {
     Contacts: {
       screen: ContactsScreens,
@@ -79,16 +79,5 @@ export default TabNavigator(
   },
   {
     initialRouteName: "Contacts",
-    tabBarPosition: "bottom",
-    tabBarOptions: {
-      style: {
-        backgroundColor: colors.greyLight,
-      },
-      showLabel: false,
-      showIcon: true,
-      activeTintColor: colors.blue,
-      inactiveTintColor: colors.greyDark,
-      renderIndicator: () => null,
-    },
   }
 );
